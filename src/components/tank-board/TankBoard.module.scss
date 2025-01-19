@@ -1,8 +1,11 @@
 .tank-board{
-    border: thin solid white;
+    // border: thin solid white;
     margin: auto;
     width: 90vw;
     display: flex;
     align-items: center;
     flex-direction: column;
+    canvas{
+        border: thin solid white;
+    }
 }
