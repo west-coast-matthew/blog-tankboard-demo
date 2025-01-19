@@ -1,4 +1,8 @@
 export default interface TankGroup{
     id: number,
-    label: string
+    label: string,
+    xPos: number,  
+    yPos: number, 
+    width: number,
+    height: number
 }

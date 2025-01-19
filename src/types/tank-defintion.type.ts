@@ -1,4 +1,8 @@
 export default interface TankDefinition{
-    id: number,
-    name: string
+    string: number,
+    name: string,
+    xPos: number,  
+    yPos: number, 
+    width: number,
+    height: number
 }
