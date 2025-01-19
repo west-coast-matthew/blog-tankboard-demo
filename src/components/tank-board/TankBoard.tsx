@@ -20,34 +20,45 @@ const TankBoard:FC = ()=>{
 
         const config = loadTanks();
         let pos:number = 10;
-        config.tanks.forEach((tank)=>{
+        config.tanks.forEach(async (tank)=>{
             pos = pos + 25;
             renderTank(tank, pos, pos)
+            console.log(`listo!`);
         });
     }
 
-    const renderTank = (tank:TankDefinition, top:number, left: number)=>{
+    const renderTank = async(tank:TankDefinition, top:number, left: number)=>{
 
         console.log(`drawing image`, tank);
 
         // loadSVG('/class-diagram.svg')
         fabric.loadSVGFromURL('/tank-example.svg')
-        .then((objects)=>{
+        .then(async (objects)=>{
             // console.log('adding image to canvas...: ', objects.objects);
             
             if(objects){
                 
                 const svg = fabric.util.groupSVGElements(objects.objects, {
+                    id: tank.id,
                     top: top, 
                     left: left,
                     lockScalingX: true,
                     lockScalingY: true,
                     hasControls: false,
+                    opacity: .05,
                 });
                 
                 // Apparently we cannot declate dimensions in the options, but we can set scale.
                 svg.scaleToWidth(TANK_WIDTH);
+                console.log(fabricCanvasRef.current);
+                svg.animate({'opacity': 1},{
+                    onChange: fabricCanvasRef.current?.renderAll.bind(fabricCanvasRef.current),
+                    duration: 5000
+                });
+
                 fabricCanvasRef?.current?.add(svg);
+
+                              
             }
             
 
