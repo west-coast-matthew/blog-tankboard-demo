@@ -1,35 +1,64 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import styles from './TankBoard.module.scss';
 import * as fabric from 'fabric'; // Import everything from the module
-import { loadTanks } from '../../services/tank-mgmnt.service';
+import { getTankSummaries, loadTankConfig } from '../../services/tank-mgmnt.service';
 import TankDefinition from '../../types/tank-defintion.type';
 import TankGroup from '../../types/tank-group.type';
+import { TankConfig } from '../../types/tank-config.type';
+import { TankSummary } from '../../types/tank-summary.type';
+import TankSummaryPanel from '../TankSummaryPanel';
 
 const TankBoard:FC = ()=>{
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
-    const [selTank, setSelTank] = useState('none');
+    const [selTank, setSelTank] = useState<TankDefinition|null>(null);
+    const [selTankSummary, setSelTankSummary] = useState<TankSummary|null>(null);
+
+    // Stores the UI configuration returned from the API.
+    const [tankCfg, setTankCfg] = useState<TankConfig|null>(null);
+    // Stores most recent API call to get up to date inventory data.
+    const [tankSummaries, setTankSummaries] = useState<Array<TankSummary>|null>(null);
 
     const CANVAS_WIDTH = 1366;
     const CANVAS_HEIGHT = 768;
 
     const TANK_WIDTH = 75;
-    const TANK_HEIGHT = 100;
+    
+    console.log(tankSummaries?.length);
+    console.log(selTankSummary);
 
     const initDisplayElements = ()=>{
         console.log(`Initializing display elements...`);
 
-        const config = loadTanks();
+        setTankSummaries(getTankSummaries());
+        const cfg = loadTankConfig();
+        setTankCfg(cfg);
 
-        renderGroupBorders(config.tankGroups);
+        renderGroupBorders(cfg.tankGroups);
 
-        let pos:number = 10;
-        config.tanks.forEach(async (tank)=>{
-            pos = pos + 25;
-            renderTank(tank, pos, pos)
+        cfg.tanks.forEach(async (tank)=>{
+            
+            renderTank(tank)
             console.log(`listo!`);
         });
+    }
+
+    const lookupCfgTankById = (tankId:string):TankDefinition|null=>{
+        const selTankCfg = tankCfg?.tanks.find((tank:TankDefinition)=>{
+            return tank.id===tankId;
+        });
+
+        return selTankCfg || null;
+    }
+
+    const lookupTankSummaryById = (tankId:string):TankSummary|null=>{
+        
+        const selTankSummary = tankSummaries?.find((tank:TankSummary)=>{
+            return tank.tankId===tankId;
+        });
+
+        return selTankSummary || null;
     }
 
     const renderGroupBorders = (tankGroups:Array<TankGroup>)=>{
@@ -62,7 +91,7 @@ const TankBoard:FC = ()=>{
         });
     }
 
-    const renderTank = async(tank:TankDefinition, top:number, left: number)=>{
+    const renderTank = async(tank:TankDefinition)=>{
 
         console.log(`drawing image`, tank);
 
@@ -79,6 +108,7 @@ const TankBoard:FC = ()=>{
                     lockScalingY: true,
                     hasControls: false,
                     opacity: .05,
+                    hoverCursor: 'pointer'
                 });
                 
                 // Apparently we cannot declate dimensions in the options, but we can set scale.
@@ -122,17 +152,22 @@ const TankBoard:FC = ()=>{
             fabricCanvasRef.current?.on('mouse:over',(evt)=>{
                 //console.log(evt.target);
                 const sel:fabric.FabricObject = evt.target as fabric.FabricObject;
-                console.log(sel);
+                console.log('sel',sel);
+
 
                 if(sel.id && sel.id.startsWith('tank-')){
                     fabricCanvasRef.current?.setActiveObject(evt.target);
                     console.log(`event: mouse over on tank!`, sel.id);
-                    setSelTank(sel.id);
+                    setSelTank(lookupCfgTankById(sel.id));
+                    setSelTankSummary(lookupTankSummaryById(sel.id));
                 }
                 
             });
-            fabricCanvasRef.current?.on('mouse:',(evt)=>{
-
+            fabricCanvasRef.current?.on('mouse:out',(evt)=>{
+                console.log(evt);
+                console.log('mouse out');
+                setSelTank(null);
+                setSelTankSummary(null);
             });
 
             initDisplayElements();
@@ -151,9 +186,10 @@ const TankBoard:FC = ()=>{
     return(
         <div className={styles['tank-board']}>
             <div>
-                <div>{ selTank }</div>
+                <div className={styles['debug']}>[{ selTank?.name }]</div>
                 <canvas id="canvas" width="500" height="500" ref={canvasRef}></canvas>
             </div>
+            <TankSummaryPanel/>
         </div>
     )
 };

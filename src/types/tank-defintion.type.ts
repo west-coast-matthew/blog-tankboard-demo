@@ -1,5 +1,5 @@
 export default interface TankDefinition{
-    string: number,
+    id: string,
     name: string,
     xPos: number,  
     yPos: number, 

@@ -1,17 +1,21 @@
 import { TankConfig } from "../types/tank-config.type";
+import { TankSummary } from "../types/tank-summary.type";
+import { getInitialTankSummarySet } from "../utils/mock-utils";
 
 
-
-const mockTanks = {
+/**
+ * Tank configurations, these are fetched once for the application.
+ */
+const mockTankConfig = {
     "tanks": [
         { "id":'tank-crush-100', "name": 'CRUSH 1', xPos: 100, yPos: 225, width: 231, height: 693},
         { "id":'tank-crush-200', "name": 'CRUSH 2', xPos: 100, yPos: 375, width: 231, height: 693},
         
         { "id":'tank-300', "name": 'PSTR 1', xPos: 400, yPos: 125, width: 231, height: 693},
         { "id":'tank-400', "name": 'FLT 1', xPos: 400, yPos: 325, width: 231, height: 693},
-        { "id":'tank-00', "name": 'CHILLER 1', xPos: 400, yPos: 525, width: 231, height: 693},
+        { "id":'tank-500', "name": 'CHILLER 1', xPos: 400, yPos: 525, width: 231, height: 693},
         
-        { "id":'tank-600', "name": 'FLTR 1', xPos: 725, yPos: 125, width: 231, height: 693},
+        { "id":'tank-600', "name": 'FLTR 2', xPos: 725, yPos: 125, width: 231, height: 693},
         { "id":'tank-700', "name": 'MIX 1', xPos: 825, yPos: 125, width: 231, height: 693},
         { "id":'tank-800', "name": 'MIX 2', xPos: 760, yPos: 325, width: 231, height: 693},
         { "id":'tank-900', "name": 'MIX 3', xPos: 760, yPos: 525, width: 231, height: 693},
@@ -30,9 +34,22 @@ const mockTanks = {
     ]
 };
 
-export const loadTanks = ():TankConfig=>{
+/**
+ * Retrieve inventory levels. This should be 
+ */
+export const getTankSummaries = ():Array<TankSummary> =>{
+    return getInitialTankSummarySet();
+}
+
+/**
+ * Load tank definition for layout purposes. For the purppose of this 
+ * demo, we emulate a remote call for the sake of simplicity.
+ * 
+ * @returns 
+ */
+export const loadTankConfig = ():TankConfig=>{
     
-    return mockTanks;
+    return mockTankConfig;
 }
 
 
