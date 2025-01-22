@@ -1,4 +1,6 @@
 # Tank Board Demo
+![Alt text](images/react-tank-board-demo.png)
+
 
 ## Background
 This project demonstrates how an dynamic, interactive HTML canvas element to provide visualization into a manufacturing process. The HTML canvas API is nothing short of impressive, however very low level. It provdes the bulding blocks however for other open source libraries to wrapper it for ease of use. In this case, FabricJS (https://fabricjs.com/).
@@ -26,6 +28,12 @@ For this example, we will mock a scenario where an organization in the beverage 
 ## Playing with the data
 
 I decided to add the ability to allow you to play with the state of the data just to make things interesting. A polling operation is implemented by the front end in order to emalate data that would change over periods of time. A control is provided which allows the end user to fast forward in time so that you can emaulate the changing state of the underlying data.
+
+Located at the bottom of the screen is a control that will stage the data in such a manner that is is set to the current state for the selected date and time.
+
+## The final product
+
+![Alt text](images/tb.png)
 
 ## Future enhancments
 * Provide dynamic connectors between tanks in order to given additional indications of current activity between tanks

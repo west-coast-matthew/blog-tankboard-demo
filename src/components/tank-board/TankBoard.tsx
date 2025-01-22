@@ -6,17 +6,25 @@ import TankDefinition from '../../types/tank-defintion.type';
 import TankGroup from '../../types/tank-group.type';
 import { TankConfig } from '../../types/tank-config.type';
 import { TankSummary } from '../../types/tank-summary.type';
-import TankSummaryPanel from '../TankSummaryPanel';
+import TankSummaryPanel from '../TankSummaryPanel/TankSummaryPanel';
+import TimeLinePanel from '../TimelinePanel';
 
 const TankBoard:FC = ()=>{
 
+    
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+
+    const [dialogTop, setDialogTop] = useState(0);
+    const [dialogLeft, setDialogLeft] = useState(0);
+
     const [selTank, setSelTank] = useState<TankDefinition|null>(null);
     const [selTankSummary, setSelTankSummary] = useState<TankSummary|null>(null);
 
+    const [displayModal, setDisplayModal] = useState(false);
+
     // Stores the UI configuration returned from the API.
-    const [tankCfg, setTankCfg] = useState<TankConfig|null>(null);
+    const [tankCfg, setTankCfg] = useState<TankConfig>({tanks:[], tankGroups:[]});
     // Stores most recent API call to get up to date inventory data.
     const [tankSummaries, setTankSummaries] = useState<Array<TankSummary>|null>(null);
 
@@ -25,33 +33,42 @@ const TankBoard:FC = ()=>{
 
     const TANK_WIDTH = 75;
     
-    console.log(tankSummaries?.length);
-    console.log(selTankSummary);
-
     const initDisplayElements = ()=>{
-        console.log(`Initializing display elements...`);
-
         setTankSummaries(getTankSummaries());
         const cfg = loadTankConfig();
+
         setTankCfg(cfg);
 
         renderGroupBorders(cfg.tankGroups);
 
         cfg.tanks.forEach(async (tank)=>{
-            
             renderTank(tank)
-            console.log(`listo!`);
         });
     }
 
-    const lookupCfgTankById = (tankId:string):TankDefinition|null=>{
-        const selTankCfg = tankCfg?.tanks.find((tank:TankDefinition)=>{
+    /**
+     * Locate tank sprite information (name, positions, etc) for a 
+     * selecetd tank id.
+     * 
+     * @param tankId 
+     * @returns 
+     */
+    const lookupCfgTankById = (tankId:string, tankCfgs:TankConfig):TankDefinition|null=>{
+        const selTankCfg = tankCfgs?.tanks.find((tank:TankDefinition)=>{
             return tank.id===tankId;
         });
-
+        if(!selTankCfg){
+            console.warn(`Cannot find selected tank ${tankId}`);
+        }
         return selTankCfg || null;
     }
 
+    /**
+     * Locate summary information (inventory, etc.) for a selected tank
+     * 
+     * @param tankId 
+     * @returns 
+     */
     const lookupTankSummaryById = (tankId:string):TankSummary|null=>{
         
         const selTankSummary = tankSummaries?.find((tank:TankSummary)=>{
@@ -93,8 +110,6 @@ const TankBoard:FC = ()=>{
 
     const renderTank = async(tank:TankDefinition)=>{
 
-        console.log(`drawing image`, tank);
-
         fabric.loadSVGFromURL('/tank-example.svg')
         .then(async (objects)=>{
             
@@ -118,7 +133,7 @@ const TankBoard:FC = ()=>{
                 svg.animate({'opacity': 1},{
                     onChange: fabricCanvasRef.current?.renderAll.bind(fabricCanvasRef.current),
                     easing: fabric.util.ease.easeInCubic,
-                    duration: 1000
+                    duration: 250
                 });
 
                 const label = new fabric.Textbox(tank.name, { 
@@ -136,7 +151,7 @@ const TankBoard:FC = ()=>{
             }
 
         }).catch(e=>{
-            console.log(e);
+            console.warn(e);
         })
 
     };
@@ -150,24 +165,29 @@ const TankBoard:FC = ()=>{
             fabricCanvasRef.current = new fabric.Canvas('canvas',{});
             fabricCanvasRef.current.setDimensions({width: CANVAS_WIDTH, height: CANVAS_HEIGHT});
             fabricCanvasRef.current?.on('mouse:over',(evt)=>{
-                //console.log(evt.target);
                 const sel:fabric.FabricObject = evt.target as fabric.FabricObject;
-                console.log('sel',sel);
-
+                
+                if(!sel){
+                    return;
+                }  
 
                 if(sel.id && sel.id.startsWith('tank-')){
                     fabricCanvasRef.current?.setActiveObject(evt.target);
-                    console.log(`event: mouse over on tank!`, sel.id);
-                    setSelTank(lookupCfgTankById(sel.id));
+                    setSelTank(lookupCfgTankById(sel.id, tankCfg));
                     setSelTankSummary(lookupTankSummaryById(sel.id));
+                    setDisplayModal(true);
+
+                    // Determine modal coordinates
+                    setDialogLeft(sel.left);
+                    setDialogTop(sel.top);
+
                 }
                 
             });
-            fabricCanvasRef.current?.on('mouse:out',(evt)=>{
-                console.log(evt);
-                console.log('mouse out');
+            fabricCanvasRef.current?.on('mouse:out',()=>{
                 setSelTank(null);
                 setSelTankSummary(null);
+                setDisplayModal(false);
             });
 
             initDisplayElements();
@@ -182,14 +202,21 @@ const TankBoard:FC = ()=>{
           };
         }
       }, []);
-  
+    
     return(
         <div className={styles['tank-board']}>
             <div>
-                <div className={styles['debug']}>[{ selTank?.name }]</div>
+                <div className={styles['debug']}>
+                    [{ selTank?.name || 'no selection' }],
+                    { String(tankCfg.tanks.length) }
+                    </div>
                 <canvas id="canvas" width="500" height="500" ref={canvasRef}></canvas>
             </div>
-            <TankSummaryPanel/>
+            { displayModal && (
+                <TankSummaryPanel  selTankSummary={selTankSummary||undefined}/>
+            )}
+            
+            <TimeLinePanel />
         </div>
     )
 };

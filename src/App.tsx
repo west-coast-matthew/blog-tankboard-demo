@@ -8,7 +8,6 @@ function App() {
   return (
     <>
       <div>
-        <h1>Tankboard Demo</h1>
         <TankBoard></TankBoard>
       </div>
     </>

@@ -5,4 +5,5 @@
 export default interface VarietalComposition{
     id: number,
     varietyName: string,
+    pct: number
 }
