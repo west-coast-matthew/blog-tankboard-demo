@@ -1,4 +1,4 @@
-import {FC, useEffect} from 'react';
+import {FC} from 'react';
 import { TankSummary } from '../../types/tank-summary.type';
 import styles from './TankSummaryPanel.module.scss';
 import MetricSummaryPanel from './MetricSummaryPanel';

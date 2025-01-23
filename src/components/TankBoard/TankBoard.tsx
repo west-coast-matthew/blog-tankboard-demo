@@ -178,8 +178,8 @@ const TankBoard:FC = ()=>{
                     setDisplayModal(true);
 
                     // Determine modal coordinates
-                    setDialogLeft(sel.left);
-                    setDialogTop(sel.top);
+                    setDialogLeft(sel.left + 200);
+                    setDialogTop(sel.top + 10);
 
                 }
                 
@@ -213,7 +213,7 @@ const TankBoard:FC = ()=>{
                 <canvas id="canvas" width="500" height="500" ref={canvasRef}></canvas>
             </div>
             { displayModal && (
-                <TankSummaryPanel  selTankSummary={selTankSummary||undefined}/>
+                <TankSummaryPanel  selTankSummary={selTankSummary||undefined} dialogLeft={dialogLeft} dialogTop={dialogTop}/>
             )}
             
             <TimeLinePanel />
